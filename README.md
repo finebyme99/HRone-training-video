@@ -46,7 +46,24 @@ Tell your AI agent:
 
 > **帮我生成 HRAS 培训视频**
 
-The agent will ask for: system name, topic, episode number, Feishu doc link, and target section. Then wait 3-5 minutes for the MP4.
+The agent will first show you a preparation checklist, then ask for 5 pieces of info. Here's what to prepare:
+
+| # | What | What it means | Example |
+|---|------|--------------|---------|
+| 1 | System name (CN + EN) | The system being trained on | 供应商协同平台 / Supplier Collaboration Platform |
+| 2 | Topic (CN + EN) | What this episode teaches | 创建员工 / Create Employees |
+| 3 | Episode number | Which episode in the series | 第1期 |
+| 4 | Feishu doc link | URL of the doc with screenshots | `https://ztn.feishu.cn/wiki/xxxxx` |
+| 5 | Target section | Which section of the doc to use | 1.2 创建员工 |
+
+**Tips**:
+
+- The Feishu doc must contain screenshots of the operation steps (the more the better, 5-15 is ideal)
+- Screenshots with red boxes/arrows marking key UI elements will get a "Key Step" highlight animation in the video
+- One doc can produce multiple episodes — just pick a different section each time
+- The doc must be accessible to your Feishu account
+
+After you provide these, the agent will confirm the details and start generating. Wait 3-5 minutes for the MP4.
 
 ---
 
