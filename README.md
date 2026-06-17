@@ -1,8 +1,154 @@
-# HRone Training Video Generator
+# HRAS 系统敏捷培训视频生成器
 
-Generate bilingual (Chinese + English) system training videos (≤60s, MP4) from Feishu/Lark documents with screenshots. Built on [HyperFrames](https://github.com/heygen-com/hyperframes) (HTML + GSAP → MP4), with AI voiceover (Chinese/English), optional background music and transition sound effects. Screenshots downloaded locally from Feishu docs for reliable rendering.
+给 AI Agent 一个飞书文档链接 → 自动生成 60 秒内的中英双语培训短视频（MP4）。
 
-**One-liner**: Give an AI agent a Feishu doc link → get a polished training video.
+基于 [HyperFrames](https://github.com/heygen-com/hyperframes)（HTML + GSAP → MP4）+ edge-tts（免费 AI 配音），截图从飞书文档下载到本地渲染，风格参考飞书/Apple 官方产品介绍。
+
+---
+
+## 使用方法
+
+把这个仓库链接发给你的 AI Agent：
+
+```
+https://github.com/finebyme99/HRone-training-video
+```
+
+然后说：**帮我生成 HRAS 培训视频**
+
+Agent 会自动完成所有操作——环境安装、信息收集、读取飞书文档、渲染 MP4。你只需要回答几个问题，等 3-5 分钟拿视频。
+
+### 你需要准备的信息
+
+| # | 信息 | 示例 |
+|---|------|------|
+| 1 | 系统名称（中英文） | 供应商协同平台 / Supplier Collaboration Platform |
+| 2 | 本期主题（中英文） | 创建员工 / Create Employees |
+| 3 | 期数 | 第1期 |
+| 4 | 飞书文档链接 | `https://ztn.feishu.cn/wiki/xxxxx` |
+| 5 | 目标章节 | 1.2 创建员工 |
+| 6 | 配音语言 | 中文 / 英文 |
+| 7 | 背景音乐 | 需要 / 不需要（推荐） |
+| 8 | 转场音效 | 需要（推荐） / 不需要 |
+
+**小贴士**：
+
+- 飞书文档里需要包含操作步骤的截图（越多越好，5-15 张为佳）
+- 一份文档可以做多期视频——每期选不同章节即可
+- 文档需要你的飞书账号有访问权限
+- 配音语言选定后不可更改，请提前确认
+
+---
+
+## 手动安装（适合非 QoderWork 用户）
+
+### 1. 安装 Skill 文件
+
+```bash
+# macOS / Linux
+mkdir -p ~/.qoderworkcn/skills/hras-training-video
+cp ~/Downloads/SKILL.md ~/.qoderworkcn/skills/hras-training-video/
+cp ~/Downloads/template-reference.md ~/.qoderworkcn/skills/hras-training-video/
+
+# Windows (PowerShell)
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.qoderworkcn\skills\hras-training-video"
+Copy-Item "$env:USERPROFILE\Downloads\SKILL.md" "$env:USERPROFILE\.qoderworkcn\skills\hras-training-video\"
+Copy-Item "$env:USERPROFILE\Downloads\template-reference.md" "$env:USERPROFILE\.qoderworkcn\skills\hras-training-video\"
+```
+
+### 2. 环境检测
+
+告诉 Agent：**安装 HRAS 视频环境**
+
+Agent 会自动检测并安装 6 项依赖（Node.js、FFmpeg、HyperFrames、lark-cli、lark-doc skill、edge-tts）。
+
+### 3. 生成视频
+
+告诉 Agent：**帮我生成 HRAS 培训视频**
+
+---
+
+## 视频结构
+
+每个视频固定三段式布局：
+
+1. **封面**（≥3s）—— 系统名称 + 主题 + 期数 + 英文 badge（配音只读主题）
+2. **操作步骤** × N（TTS 驱动时长）—— 左：中英双语文字（380px），右：系统截图（920px，完整展示不裁切），深色背景
+3. **结尾**（TTS 驱动时长）—— "本期结束" + 反馈提示
+
+场景间转场：0.1s 黑色闪光。
+
+### 输出规格
+
+- 格式：MP4（H.264）
+- 分辨率：1920×1080
+- 时长：≤ 60 秒（TTS 驱动，动态计算）
+- 音频：AI 配音（中文或英文，edge-tts）+ 可选背景音乐 + 可选转场音效
+- 截图：下载到本地，`object-fit: contain` 完整展示
+
+---
+
+## 文件结构
+
+```
+HRone-training-video/
+├── README.md                  ← 项目介绍（你正在看的）
+├── agent-guide.md             ← Agent 操作手册
+├── SKILL.md                   ← 完整工作流 + GSAP 动画规范
+├── template-reference.md      ← HTML 模板 + 时长公式
+└── LICENSE                    ← MIT
+```
+
+### 各平台 Skill 安装位置
+
+| 平台 | Skill 文件位置 | Agent 加载方式 |
+|------|--------------|--------------|
+| QoderWork | `~/.qoderworkcn/skills/hras-training-video/` | 自动加载 |
+| Cursor | 项目根目录或 `.cursor/` | 在聊天中 `@` 引用 |
+| Claude Code | 项目根目录或 `~/.claude/` | 在对话中引用 |
+| 其他 Agent | 任意可访问路径 | 将 SKILL.md 内容作为上下文传入 |
+
+---
+
+## 环境依赖
+
+| 依赖 | 最低版本 | 用途 | 自动安装 |
+|------|---------|------|---------|
+| Node.js | ≥ 22 | HyperFrames 运行时 | `brew install node` |
+| FFmpeg | 任意 | 视频编码 + 音频混合 | `brew install ffmpeg` |
+| HyperFrames | latest | HTML→MP4 渲染引擎 | `npx` 自动下载 |
+| Chrome | 捆绑版 | 无头浏览器逐帧截图 | HyperFrames 自动下载 |
+| lark-cli | 任意 | 飞书文档 API + 图片下载 | QoderWork 飞书集成 |
+| lark-doc skill | 任意 | 飞书文档读取 | Skill Market 安装 |
+| edge-tts | 任意 | AI 配音（免费 TTS） | `pip3 install edge-tts` |
+
+---
+
+## Windows 用户
+
+渲染管线需要 WSL2 环境：
+
+```powershell
+# 管理员 PowerShell
+wsl --install
+```
+
+重启后在 WSL2 终端（Ubuntu）中执行所有命令。
+
+---
+
+## 故障排除
+
+| 问题 | 解决 |
+|------|------|
+| 渲染后截图空白 | 飞书 URL 过期 → 必须下载到本地（`lark-cli docs +media-download`） |
+| 不同场景配音音色不一致 | TTS 分批生成了 → 一次性全部重新生成 |
+| 音视频不对齐 | AAC 时长不精确 → 使用 WAV 中间格式 |
+| `edge-tts: not found` | macOS PATH 问题 → 用 `python3 -m edge_tts` |
+| 渲染崩溃 | 关闭其他应用释放内存后重试 |
+| `lark-cli: not found` | 发送任意飞书文档链接触发安装 |
+| `HyperFrames init` 报 ENOTEMPTY | 删除 `~/.npm/_npx/<缓存目录>` 后重试 |
+| 首次渲染很慢 | 正常——HyperFrames 需下载 ~300MB Chrome 捆绑包 |
 
 ---
 
@@ -24,234 +170,37 @@ Then follow agent-guide.md from Step 1 to Step 9. Everything you need is in this
 - **Local images**: Download Feishu screenshots locally (URLs expire in minutes).
 - **WAV intermediate**: Use WAV for all audio processing; only convert to AAC at final merge.
 
----
+### Agent Auto-Setup
 
-## For Humans
-
-Want to generate HRAS training videos? Just send this link to your AI agent:
-
-```
-https://github.com/finebyme99/HRone-training-video
-```
-
-Then say: **帮我生成 HRAS 培训视频**
-
-The agent will handle everything — environment setup, collecting your inputs, reading the Feishu doc, and rendering the MP4. You just answer a few questions and wait 3-5 minutes.
-
-### What you'll need to provide
-
-| # | What | Example |
-|---|------|---------|
-| 1 | System name (CN + EN) | 供应商协同平台 / Supplier Collaboration Platform |
-| 2 | Topic (CN + EN) | 创建员工 / Create Employees |
-| 3 | Episode number | 第1期 |
-| 4 | Feishu doc link | `https://ztn.feishu.cn/wiki/xxxxx` |
-| 5 | Target section | 1.2 创建员工 |
-| 6 | Voiceover language | Chinese or English narration |
-| 7 | Background music | Yes / No (recommended) |
-| 8 | Transition SFX | Yes (recommended) / No |
-
-The Feishu doc should contain screenshots of the operation steps (the more the better, 5-15 is ideal).
-
----
-
-## Quick Start (Manual Setup)
-
-### 1. Install the skill files
+Execute these checks in order. Auto-install where possible:
 
 ```bash
-# macOS / Linux
-mkdir -p ~/.qoderworkcn/skills/hras-training-video
-
-# Windows (PowerShell)
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.qoderworkcn\skills\hras-training-video"
-```
-
-Download the files from this repo and place them in the directory above:
-- [`SKILL.md`](./SKILL.md) — main workflow + rules
-- [`template-reference.md`](./template-reference.md) — HTML template reference
-
-```bash
-# macOS / Linux (assuming files in ~/Downloads)
-cp ~/Downloads/SKILL.md ~/.qoderworkcn/skills/hras-training-video/
-cp ~/Downloads/template-reference.md ~/.qoderworkcn/skills/hras-training-video/
-
-# Windows (PowerShell)
-Copy-Item "$env:USERPROFILE\Downloads\SKILL.md" "$env:USERPROFILE\.qoderworkcn\skills\hras-training-video\"
-Copy-Item "$env:USERPROFILE\Downloads\template-reference.md" "$env:USERPROFILE\.qoderworkcn\skills\hras-training-video\"
-```
-
-### 2. Run environment setup
-
-Tell your AI agent:
-
-> **安装 HRAS 视频环境**
-
-The agent will auto-check and install all 6 dependencies (Node.js, FFmpeg, HyperFrames, lark-cli, lark-doc skill, edge-tts). See [Agent Auto-Setup](#agent-auto-setup) below for details.
-
-### 3. Generate a video
-
-Tell your AI agent:
-
-> **帮我生成 HRAS 培训视频**
-
-The agent will first show you a preparation checklist, then ask for 8 pieces of info.
-
-**Tips**:
-
-- The Feishu doc must contain screenshots of the operation steps (the more the better, 5-15 is ideal)
-- One doc can produce multiple episodes — just pick a different section each time
-- The doc must be accessible to your Feishu account
-- Videos include AI voiceover — choose Chinese or English narration when prompted
-- Background music and SFX are optional — no BGM by default, SFX recommended
-
-After you provide these, the agent will confirm the details and start generating. Wait 3-5 minutes for the MP4.
-
----
-
-## Agent Auto-Setup
-
-This section is written for AI agents to follow programmatically.
-
-### Prerequisites check & auto-install
-
-#### Check 1: Node.js ≥ 22
-
-```bash
+# 1. Node.js ≥ 22
 node --version
-```
+# Missing? brew install node / apt install nodejs
 
-If missing or version < 22: `brew install node` (macOS) / `apt install nodejs` (Linux)
-
-#### Check 2: FFmpeg
-
-```bash
+# 2. FFmpeg
 ffmpeg -version 2>&1 | head -1
-```
+# Missing? brew install ffmpeg / apt install ffmpeg
 
-If missing: `brew install ffmpeg` (macOS) / `apt install ffmpeg` (Linux)
-
-#### Check 3: HyperFrames rendering engine
-
-```bash
+# 3. HyperFrames rendering engine
 npx --yes hyperframes@latest doctor 2>&1
-```
+# Auto-downloads ~300MB Chrome bundle on first run
 
-Auto-downloads HyperFrames + bundled Chrome (~300MB first time). Confirm no critical errors.
+# 4. lark-cli (Feishu doc reader)
+which lark-cli 2>&1 && lark-cli auth status 2>&1
+# Missing: bundled with QoderWork Lark integration
+# Unauthorized: guide user to send a Feishu doc link
 
-#### Check 4: lark-cli (Feishu doc reader)
-
-```bash
-which lark-cli 2>&1
-lark-cli auth status 2>&1
-```
-
-If missing: bundled with QoderWork's Lark integration. If unauthorized: guide user to send a Feishu doc link.
-
-#### Check 5: lark-doc skill
-
-```bash
+# 5. lark-doc skill
 ls ~/.qoderworkcn/skills/lark-doc/SKILL.md 2>&1
-```
+# Missing: install from QoderWork Skill Market
 
-If missing: install from QoderWork Skill Market.
-
-#### Check 6: edge-tts (AI voiceover)
-
-```bash
+# 6. edge-tts (AI voiceover)
 python3 -m edge_tts --version 2>&1
+# Missing: pip3 install edge-tts
+# Note: on macOS use `python3 -m edge_tts` (PATH issues)
 ```
-
-If missing: `pip3 install edge-tts`
-
-> **Note**: On macOS, use `python3 -m edge_tts` instead of `edge-tts` (PATH issues).
-
----
-
-## File Structure
-
-```
-HRone-training-video/
-├── README.md                  ← You are here (project overview)
-├── agent-guide.md             ← Agent operation manual (read this first!)
-├── SKILL.md                   ← Detailed workflow + GSAP animation rules
-├── template-reference.md      ← HTML composition template + formulas
-└── LICENSE                    ← MIT
-```
-
-### How to use these files
-
-| Platform | Where to put files | How agent loads them |
-|----------|-------------------|---------------------|
-| QoderWork | `~/.qoderworkcn/skills/hras-training-video/` | Auto-loaded as skill |
-| Cursor | Project root or `.cursor/` directory | Reference in chat or `@` the file |
-| Claude Code | Project root or `~/.claude/` | Reference in conversation |
-| Other agents | Any accessible path | Feed `SKILL.md` content as context |
-
----
-
-## Dependencies
-
-| Dependency | Min Version | Purpose | Auto-install? |
-|-----------|-------------|---------|--------------|
-| Node.js | ≥ 22 | HyperFrames runtime | Yes (`brew` / `apt`) |
-| FFmpeg | any | Video encoding + audio mixing | Yes (`brew` / `apt`) |
-| HyperFrames | latest | HTML→MP4 renderer | Yes (`npx` auto-download) |
-| Chrome | bundled | Headless frame capture | Yes (HyperFrames auto-download) |
-| lark-cli | any | Feishu doc API + image download | Via QoderWork Lark integration |
-| lark-doc skill | any | Feishu doc reading | Via Skill Market |
-| edge-tts | any | AI voiceover (free TTS) | Yes (`pip3`) |
-
----
-
-## Output Specs
-
-- Format: MP4 (H.264)
-- Resolution: 1920x1080
-- Duration: ≤ 60 seconds (TTS-driven, dynamic)
-- Structure: Title card (≥3s) → N steps (left text + right screenshot) → Closing
-- Audio: AI voiceover (Chinese or English, via edge-tts) + optional BGM + optional SFX
-- Screenshots: downloaded locally, displayed with `object-fit: contain` (full view, no cropping)
-
----
-
-## Video Structure
-
-Each video follows a fixed layout:
-
-1. **Title Card** (≥3s, TTS-driven) — System name + topic + episode + English badge (voiceover reads only the topic)
-2. **Steps** (TTS-driven duration each) — Left: bilingual text (380px), Right: screenshot (920px, contain), dark background
-3. **Closing** (TTS-driven) — "本期结束" + feedback prompt
-
-Transitions between scenes: 0.1s black flash overlay.
-
----
-
-## Windows Users
-
-Windows requires WSL2 for the rendering pipeline:
-
-```powershell
-# Install WSL2 (run PowerShell as Administrator)
-wsl --install
-```
-
-After reboot, open the WSL2 terminal (Ubuntu) and run all commands from there.
-
----
-
-## Troubleshooting
-
-| Issue | Fix |
-|-------|-----|
-| Screenshots blank in render | Feishu URLs expired — must download locally via `lark-cli docs +media-download` |
-| Voice sounds different between scenes | TTS generated in separate batches — regenerate ALL in one batch |
-| Audio/video out of sync | AAC duration imprecise — use WAV intermediate format |
-| `edge-tts: not found` | macOS PATH issue — use `python3 -m edge_tts` |
-| Render crashes | Close other apps to free RAM, retry |
-| `lark-cli: not found` | Send any Feishu doc link to trigger installation |
-| `HyperFrames init` ENOTEMPTY | Delete `~/.npm/_npx/<cache-dir>` and retry |
-| Slow first render | Normal — ~300MB Chrome bundle download |
 
 ---
 
