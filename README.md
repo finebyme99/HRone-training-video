@@ -6,6 +6,11 @@
 
 ---
 
+
+# 输出成果案例
+点击进飞书查看往期视频：https://ztn.feishu.cn/file/DEJcbADW0oshzexb6Kec5Vq0nLe
+
+
 ## 使用方法
 
 把这个仓库链接发给你的 AI Agent：
